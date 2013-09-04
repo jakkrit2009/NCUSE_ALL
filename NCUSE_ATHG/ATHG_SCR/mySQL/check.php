@@ -17,21 +17,26 @@ if (!empty($result)) {
 				$data_array[$i]['idUsers'] = $arr->idUsers;
 				$data_array[$i]['idLoca'] = $arr->idLoca;
 				$data_array[$i]['date'] = $arr->date;
-				
+				 $data_array['success'] = 1;
 				//$dd=$arr->date+strtotime('+1 days ');
 				if($arr->date<date('Y-m-d H:i:s')){
-					mysql_query('UPDATE checkins SET  date = "'.date('Y-m-d H:i:s',strtotime('+1 days')) .'"  WHERE idUsers ="'.$_GET['idUsers'].'" AND idLoca ="'.$_GET['idLoca'].'" LIMIT 1')or die(mysql_error());
+					mysql_query('INSERT INTO checkins(idUsers, idLoca, date) VALUES("'.$_GET['idUsers'].'","'.$_GET['idLoca'].'","'.date('Y-m-d H:i:s',strtotime('+1 days')) .'")')or die(mysql_error());
+					echo json_encode($data_array);
 				}
 				else {
-					$erro = 1;
-		echo $erro;
+					$data_array["success"] = 0;
+            $data_array["message"] = "No user found";
+ 
+            // echo no users JSON
+            echo json_encode($data_array);
 	}
 				$i++;
 			}
 		}
 		else {
 			mysql_query('INSERT INTO checkins(idUsers, idLoca, date) VALUES("'.$_GET['idUsers'].'","'.$_GET['idLoca'].'","'.date('Y-m-d H:i:s',strtotime('+1 days')) .'")')or die(mysql_error());
-		echo "BBB";
+		$data_array["success"] = 1;
+		echo json_encode($data_array);
 	}
 }
 
