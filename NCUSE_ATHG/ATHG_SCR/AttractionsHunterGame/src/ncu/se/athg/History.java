@@ -1,6 +1,5 @@
 package ncu.se.athg;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,13 +45,15 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 //import ncu.se.athg.CheckDistance.SearchStatus;
 
-public class History extends FragmentActivity{
-	
+public class History extends FragmentActivity {
+
 	LocationManager lm;
-	private String texLoca,texIdUsers,history,imgHis,urlUsers,idStatus,tema,urlStatu,urlHistor,id;
-	double latitude,longitude,lat_desc, lon_desc;
+	private String texLoca, texIdUsers, history, imgHis, urlUsers, idStatus,
+			tema, urlStatu, urlHistor, id;
+	double latitude, longitude, lat_desc, lon_desc;
 	final ArrayList<HashMap<String, String>> MyArrList = new ArrayList<HashMap<String, String>>();
 	HashMap<String, String> map;
 	final ArrayList<HashMap<String, String>> MyArrList1 = new ArrayList<HashMap<String, String>>();
@@ -61,303 +62,269 @@ public class History extends FragmentActivity{
 	HashMap<String, String> statu;
 	final ArrayList<HashMap<String, String>> MyArrList3 = new ArrayList<HashMap<String, String>>();
 	HashMap<String, String> check;
-	TextView scorEeagle,scorLandgo ,textHistory;
-	ImageView win,img;
+	TextView scorEeagle, scorLandgo, textHistory;
+	ImageView win, img;
 	private ProgressDialog pDialog;
-	int landgon, eagle,sumExp,arrogate,authority,sumEagle,sumLandgon,score,expnum;
-	static double total ;
+	int landgon, eagle, sumExp, arrogate, authority, sumEagle, sumLandgon,
+			score, expnum;
+	static double total;
 	JSONParser jsonParser = new JSONParser();
-	 AlertDialog alertDialog ;
-	
-	
-	
+	AlertDialog alertDialog;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.history);
-		
-		
-		
-	//setupActionBar();
-		 lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 
-	        Criteria criteria = new Criteria();
-	        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-	        criteria.setAltitudeRequired(false);
-	        criteria.setBearingRequired(false);
-		
+		lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+		Criteria criteria = new Criteria();
+		criteria.setAccuracy(Criteria.ACCURACY_FINE);
+		criteria.setAltitudeRequired(false);
+		criteria.setBearingRequired(false);
+
+		// รับค่าจากหน้า MAP ที่ส่งไอดีผู้ใช้ กับไอดีสถานที่
 		Intent myInteger = getIntent();
 		texLoca = myInteger.getStringExtra("idLoca");
 		texIdUsers = myInteger.getStringExtra("idUsers");
 		new SearchHistory().execute();
 		onPageStarted();
-		scorLandgo = (TextView)findViewById(R.id.scorLandgo);
-        
-        scorEeagle = (TextView)findViewById(R.id.scorEeagle);
-        textHistory = (TextView)findViewById(R.id.textHistory);
-		//scorEeagle.setText("สหพันธรัฐ Eagle"+eagle+"คะแนน");*/
-        img = (ImageView) findViewById(R.id.image);
-        win = (ImageView) findViewById(R.id.win);
-        
-       
-        
-       // alert();
-		
-		
+		scorLandgo = (TextView) findViewById(R.id.scorLandgo);
+
+		scorEeagle = (TextView) findViewById(R.id.scorEeagle);
+		textHistory = (TextView) findViewById(R.id.textHistory);
+		img = (ImageView) findViewById(R.id.image);
+		win = (ImageView) findViewById(R.id.win);
+
 	}
-	public void alert(){
-		alertDialog= new AlertDialog.Builder(this).create();
-		 alertDialog.setTitle("Title");
-	        alertDialog.setMessage("Message");
-	        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-	           public void onClick(DialogInterface dialog, int which) {
-	              // TODO Add your code for the button here.
-	           }
-	        });
-	        alertDialog.show();
-		
-	        
-		Log.v("FFFFF", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-		
+
+	// alertDialogแจ้งเตือน
+	public void alert() {
+		alertDialog = new AlertDialog.Builder(this).create();
+		alertDialog.setTitle("Title");
+		alertDialog.setMessage("Message");
+		alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Add your code for the button here.
+			}
+		});
+		alertDialog.show();
+
 	}
-	
-	public void onPageStarted() {            	            
-        //Log.e("Load",url);
-		 pDialog = new ProgressDialog(this);
-        pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        pDialog.setMessage("Loading..");
-        pDialog.setTitle("Attractions Hunter Game");
-        pDialog.setCancelable(false);            
-        pDialog.show();
-    }       
+
+	// แสดงDialogบอกว่าLoading..
+	public void onPageStarted() {
+		// Log.e("Load",url);
+		pDialog = new ProgressDialog(this);
+		pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+		pDialog.setMessage("Loading..");
+		pDialog.setTitle("Attractions Hunter Game");
+		pDialog.setCancelable(false);
+		pDialog.show();
+	}
 
 	public void onResume() {
-        super.onResume();
-        setup();
-    }
-    
-    public void onStart() {
-        super.onStart();
-        boolean gpsEnabled, networkEnabled;
-        gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-        if(!gpsEnabled) {
-            networkEnabled = 
-                    lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if(!networkEnabled) {
-                Intent intent = 
-                        new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        }
-    }
-    
-    public void onStop() {
-        super.onStop();
-        lm.removeUpdates(listener);
-    }
- 
-    public void setup() {
-        lm.removeUpdates(listener);
-        String latit = "Unknown";
-        String longit = "Unknown";
-        
-        Location networkLocation = requestUpdatesFromProvider(
-                LocationManager.NETWORK_PROVIDER, "Network not supported");
-        if(networkLocation != null) {
-            latit = String.format("%.6f", networkLocation.getLatitude());
-            longit = String.format("%.6f", networkLocation.getLongitude());
-        }
-        
-        Location gpsLocation = requestUpdatesFromProvider(
-                LocationManager.GPS_PROVIDER, "GPS not supported");
-        
-        if(gpsLocation != null) {
-            latit = String.format("%.6f", gpsLocation.getLatitude());
-            longit = String.format("%.6f", gpsLocation.getLongitude());
-        }
-        
-        Log.i("latitude", latit);
-        Log.i("longitude", longit);
-        latitude = Double.parseDouble(latit);
-        longitude = Double.parseDouble(longit);
-        
-        
-    }
-    
-    public Location requestUpdatesFromProvider(final String provider
-            , String error) {
-        Location location = null;
-        if (lm.isProviderEnabled(provider)) {
-            lm.requestLocationUpdates(provider, 1000, 10, listener);
-            location = lm.getLastKnownLocation(provider);
-        } else {
-            //Toast.makeText(this, error, Toast.LENGTH_LONG).show();
-        }
-        return location;
-    }
-    
-    public final LocationListener listener = new LocationListener() {
-        public void onLocationChanged(Location location) {
-        	latitude= Double.parseDouble(String.format("%.6f", location.getLatitude()));
-        	longitude = Double.parseDouble(String.format("%.6f"
-                    ,location.getLongitude()));
-            
-        }
-
-        public void onProviderDisabled(String provider) { }
-
-        public void onProviderEnabled(String provider) { }
-
-        public void onStatusChanged(String provider
-                , int status, Bundle extras) { }
-    };
-	public class SearchHistory extends AsyncTask<String, Void, Void> {
-    	
-
-        @Override
-        protected Void doInBackground(String... arg) {
-            // TODO Auto-generated method stub
-
-    		
-        	
-    		// Paste Parameters
-    		List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("idUsers", texLoca));
-           Log.i("aaaaaaaa", texLoca);
-            
-            //JSONObject json = jsonParser.makeHttpRequest(urlUsers,"GET", params);
-            
-            try {
-            	String urlHistory = "http://110.164.78.161/~b531610005/jsonHistory.php?idLoca="+texLoca;
-            	
-            	            	
-    			Log.i("ssss", urlHistory);
-    			JSONArray data = new JSONArray(getJSONUrl(urlHistory,params));
-    			for(int i = 0; i < data.length(); i++){
-                    JSONObject c = data.getJSONObject(i);
-                    Log.i("aa", "a");
-    			
-    			
-                   // JSONObject c = json.getJSONObject(idUsers);
-                    map = new HashMap<String, String>();
-                    map.put("idUsers", c.getString("idLoca"));
-                    map.put("nameLoca", c.getString("nameLoca"));
-                    map.put("latitude", c.getString("latitude"));
-                    map.put("longitude", c.getString("longitude"));
-                    map.put("historyLoca", c.getString("historyLoca"));
-                    map.put("imageLoca", c.getString("imageLoca"));
-                    map.put("score", c.getString("score"));
-                    map.put("eagle", c.getString("eagle"));
-                    map.put("landgon", c.getString("landgon"));
-                    Log.i("dfsdfsdfsdf", c.getString("nameLoca"));
-                   
-        			MyArrList.add(map);
-        			
-        			landgon = Integer.parseInt(c.getString("landgon"));
-        			eagle = Integer.parseInt(c.getString("eagle"));
-        			history= c.getString("historyLoca");
-        			imgHis= c.getString("imageLoca");
-        			 
-        			
-        			
-        			
-        			//loadImage(i1);
-        			//exp.setText("Exp\t"+sumExp);
-        			
-        			Log.i("AAAAA", "AA" + eagle);
-        			
-        			//TextView scorEeagle = (TextView)findViewById(R.id.scorEeagle);
-        			runOnUiThread(new Runnable()
-        			{
-        				@Override
-        				public void run()
-        				{
-        					scorEeagle.setText("สหพันธรัฐ Eagle\t"+eagle+"\tคะแนน");
-        					scorLandgo.setText("จักรวรรดิ์ landgon\t"+landgon+"คะแนน");
-        					textHistory.setText(history);
-        					if(landgon>eagle)
-                			{
-                            	Log.i("t", "f");
-                            	
-                				win.setImageResource(R.drawable.landgon);
-                			}
-                			else{
-                				Log.i("l", "w");
-                				win.setImageResource(R.drawable.eagle);
-                			}
-        					img.setTag(imgHis);
-
-
-        					new DownloadImagesTask().execute(img);
-        					
-        					//loadImage(i1);
-        					//loadImage(i1);
-                			
-        				}        				
-        			});
-
-        			
-        			//ImageView win = (ImageView) findViewById(R.id.win);
-        			
-                    
-    			}
-    			
-
-    		} catch (JSONException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-
-			
-            
-            
-            pDialog.cancel();
-    		return null;
-        }
-
-    }
-	
-	public class DownloadImagesTask extends AsyncTask<ImageView, Void, Bitmap> {
-
-	    ImageView imageView = null;
-
-	    @Override
-	    protected Bitmap doInBackground(ImageView... imageViews) {
-	        this.imageView = imageViews[0];
-	        return download_Image((String)imageView.getTag());
-	    }
-
-	    @Override
-	    protected void onPostExecute(Bitmap result) {
-	        imageView.setImageBitmap(result);
-	    }
-
-	    private Bitmap download_Image(String url) {
-
-	        Bitmap bmp =null;
-	        try{
-	            URL ulrn = new URL(url);
-	            HttpURLConnection con = (HttpURLConnection)ulrn.openConnection();
-	            InputStream is = con.getInputStream();
-	            bmp = BitmapFactory.decodeStream(is);
-	            if (null != bmp)
-	                return bmp;
-
-	            }catch(Exception e){}
-	        
-	        return bmp;
-	    }
+		super.onResume();
+		setup();
 	}
 
-    
-    // Get JSON code from URL
-	public String getJSONUrl(String url,List<NameValuePair> params) {
+	public void onStart() {
+		super.onStart();
+		boolean gpsEnabled, networkEnabled;
+		gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+		if (!gpsEnabled) {
+			networkEnabled = lm
+					.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+			if (!networkEnabled) {
+				Intent intent = new Intent(
+						Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+				startActivity(intent);
+			}
+		}
+	}
+
+	public void onStop() {
+		super.onStop();
+		lm.removeUpdates(listener);
+	}
+
+	// หาพิกัดที่เราอยู่
+	public void setup() {
+		lm.removeUpdates(listener);
+		String latit = "Unknown";
+		String longit = "Unknown";
+
+		Location networkLocation = requestUpdatesFromProvider(
+				LocationManager.NETWORK_PROVIDER, "Network not supported");
+		if (networkLocation != null) {
+			latit = String.format("%.6f", networkLocation.getLatitude());
+			longit = String.format("%.6f", networkLocation.getLongitude());
+		}
+
+		Location gpsLocation = requestUpdatesFromProvider(
+				LocationManager.GPS_PROVIDER, "GPS not supported");
+
+		if (gpsLocation != null) {
+			latit = String.format("%.6f", gpsLocation.getLatitude());
+			longit = String.format("%.6f", gpsLocation.getLongitude());
+		}
+
+		Log.i("latitude", latit);
+		Log.i("longitude", longit);
+		latitude = Double.parseDouble(latit);
+		longitude = Double.parseDouble(longit);
+
+	}
+
+	// หาพิกัดทุกๆ10วินาที
+	public Location requestUpdatesFromProvider(final String provider,
+			String error) {
+		Location location = null;
+		if (lm.isProviderEnabled(provider)) {
+			lm.requestLocationUpdates(provider, 1000, 10, listener);
+			location = lm.getLastKnownLocation(provider);
+		} else {
+			// Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+		}
+		return location;
+	}
+
+	public final LocationListener listener = new LocationListener() {
+		public void onLocationChanged(Location location) {
+			latitude = Double.parseDouble(String.format("%.6f",
+					location.getLatitude()));
+			longitude = Double.parseDouble(String.format("%.6f",
+					location.getLongitude()));
+
+		}
+
+		public void onProviderDisabled(String provider) {
+		}
+
+		public void onProviderEnabled(String provider) {
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {
+		}
+	};
+
+	// คนหาประวัติสถานที่ จากไอดีที่เรารับมา
+	public class SearchHistory extends AsyncTask<String, Void, Void> {
+
+		@Override
+		protected Void doInBackground(String... arg) {
+			// TODO Auto-generated method stub
+
+			// Paste Parameters
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("idUsers", texLoca));
+			Log.i("aaaaaaaa", texLoca);
+
+			try {
+				String urlHistory = "http://110.164.78.161/~b531610005/jsonHistory.php?idLoca="
+						+ texLoca;
+
+				JSONArray data = new JSONArray(getJSONUrl(urlHistory, params));
+				for (int i = 0; i < data.length(); i++) {
+					JSONObject c = data.getJSONObject(i);
+
+					map = new HashMap<String, String>();
+					map.put("idUsers", c.getString("idLoca"));
+					map.put("nameLoca", c.getString("nameLoca"));
+					map.put("latitude", c.getString("latitude"));
+					map.put("longitude", c.getString("longitude"));
+					map.put("historyLoca", c.getString("historyLoca"));
+					map.put("imageLoca", c.getString("imageLoca"));
+					map.put("score", c.getString("score"));
+					map.put("eagle", c.getString("eagle"));
+					map.put("landgon", c.getString("landgon"));
+					Log.i("dfsdfsdfsdf", c.getString("nameLoca"));
+
+					MyArrList.add(map);
+
+					landgon = Integer.parseInt(c.getString("landgon"));
+					eagle = Integer.parseInt(c.getString("eagle"));
+					history = c.getString("historyLoca");
+					imgHis = c.getString("imageLoca");
+
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							// แสดงคะแนนขอทีม
+							scorEeagle.setText("สหพันธรัฐ Eagle\t" + eagle
+									+ "\tคะแนน");
+							scorLandgo.setText("จักรวรรดิ์ landgon\t" + landgon
+									+ "คะแนน");
+							textHistory.setText(history);
+							if (landgon > eagle) {
+
+								win.setImageResource(R.drawable.landgon);
+							} else {
+								win.setImageResource(R.drawable.eagle);
+							}
+							img.setTag(imgHis);
+
+							new DownloadImagesTask().execute(img);
+
+						}
+					});
+
+				}
+
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			pDialog.cancel();
+			return null;
+		}
+
+	}
+
+	// นำลิ้งURLรูปภาพมาแสดง
+	public class DownloadImagesTask extends AsyncTask<ImageView, Void, Bitmap> {
+
+		ImageView imageView = null;
+
+		@Override
+		protected Bitmap doInBackground(ImageView... imageViews) {
+			this.imageView = imageViews[0];
+			return download_Image((String) imageView.getTag());
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			imageView.setImageBitmap(result);
+		}
+
+		private Bitmap download_Image(String url) {
+
+			Bitmap bmp = null;
+			try {
+				URL ulrn = new URL(url);
+				HttpURLConnection con = (HttpURLConnection) ulrn
+						.openConnection();
+				InputStream is = con.getInputStream();
+				bmp = BitmapFactory.decodeStream(is);
+				if (null != bmp)
+					return bmp;
+
+			} catch (Exception e) {
+			}
+
+			return bmp;
+		}
+	}
+
+	// Get JSON code from URL
+	public String getJSONUrl(String url, List<NameValuePair> params) {
 		StringBuilder str = new StringBuilder();
 		HttpClient client = new DefaultHttpClient();
 		HttpPost httpPost = new HttpPost(url);
-		
+
 		try {
 			httpPost.setEntity(new UrlEncodedFormEntity(params));
 			HttpResponse response = client.execute(httpPost);
@@ -366,7 +333,8 @@ public class History extends FragmentActivity{
 			if (statusCode == 200) { // Download OK
 				HttpEntity entity = response.getEntity();
 				InputStream content = entity.getContent();
-				BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(content));
 				String line;
 				while ((line = reader.readLine()) != null) {
 					str.append(line);
@@ -379,10 +347,10 @@ public class History extends FragmentActivity{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Log.e("aa3333333", str.toString());
 		return str.toString();
 	}
-	
+
+	// คนหาข้่อมูลผู้ใช้จากไอดีที่เรารับมา
 	public class SearchUsers extends AsyncTask<String, Void, Void> {
 
 		@Override
@@ -392,22 +360,16 @@ public class History extends FragmentActivity{
 			// Paste Parameters
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("idUsers", texIdUsers));
-			Log.i("aaaaaaaa", texIdUsers);
-
-			// JSONObject json = jsonParser.makeHttpRequest(urlUsers,"GET",
-			// params);
 
 			try {
 				urlUsers = "http://110.164.78.161/~b531610005/jsonUsers.php?idUsers="
 						+ texIdUsers;
 
-				Log.i("ssss", urlUsers);
 				JSONArray data = new JSONArray(getJSONUrl(urlUsers, params));
 				for (int i = 0; i < data.length(); i++) {
 					JSONObject c = data.getJSONObject(i);
 					Log.i("aa", "a");
 
-					// JSONObject c = json.getJSONObject(idUsers);
 					users = new HashMap<String, String>();
 					users.put("idUsers", c.getString("idUsers"));
 					users.put("tema", c.getString("tema"));
@@ -420,8 +382,7 @@ public class History extends FragmentActivity{
 					tema = c.getString("tema");
 
 					MyArrList1.add(users);
-					Log.i("aa3333333", idStatus);
-					// Log.i("tema", tema);
+
 					new SearchStatus().execute();
 
 				}
@@ -431,10 +392,11 @@ public class History extends FragmentActivity{
 				e.printStackTrace();
 			}
 
-			// exp.setText("Exp\t"+sumExp);
 			return null;
 		}
 	}
+
+	// คนหน้าสถานยศจากไอดีผู้ใช้ที่เรารับมา
 	public class SearchStatus extends AsyncTask<String, Void, Void> {
 
 		@Override
@@ -446,38 +408,25 @@ public class History extends FragmentActivity{
 			params.add(new BasicNameValuePair("idStatus", idStatus));
 			Log.i("aaaaaaaa", idStatus);
 
-			// JSONObject json = jsonParser.makeHttpRequest(urlUsers,"GET",
-			// params);
-
 			try {
 				urlStatu = "http://110.164.78.161/~b531610005/jsonStatus.php?idStatus="
 						+ idStatus;
 
-				Log.i("ssss", idStatus);
 				JSONArray data = new JSONArray(getJSONUrl(urlStatu, params));
 				for (int i = 0; i < data.length(); i++) {
 					JSONObject c = data.getJSONObject(i);
 					Log.i("aa", "a");
 
-					// JSONObject c = json.getJSONObject(idUsers);
 					statu = new HashMap<String, String>();
 					statu.put("idStatus", c.getString("idStatus"));
 					statu.put("nameStatus", c.getString("nameStatus"));
 					statu.put("exp", c.getString("exp"));
 					statu.put("authority", c.getString("authority"));
-					// Log.i("aa", c.getString("sumExp"));
-					// sumExp = c.getString("sumExp");
 
 					authority = Integer.parseInt(c.getString("authority"));
-					Log.e("aa", "SS" + authority);
 
-					// tema=c.getString("tema");
-					Log.e("aa", "a" + authority);
-					// Log.i("tema", tema);
 					MyArrList2.add(statu);
-					// Log.i("tema", tema);
 					new CheckHistory().execute();
-					// exp.setText("Exp\t"+sumExp);
 				}
 				;
 			} catch (JSONException e) {
@@ -489,7 +438,8 @@ public class History extends FragmentActivity{
 			return null;
 		}
 	}
-	
+
+	// ตรวจสอบประวัติสถานที่เรายึดครอง
 	public class CheckHistory extends AsyncTask<String, Void, Void> {
 
 		@Override
@@ -499,22 +449,15 @@ public class History extends FragmentActivity{
 			// Paste Parameters
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("idLoca", texLoca));
-			Log.i("aaaaaaaa", texLoca);
-
-			// JSONObject json = jsonParser.makeHttpRequest(urlUsers,"GET",
-			// params);
 
 			try {
 				String urlUsers = "http://110.164.78.161/~b531610005/jsonHistory.php?idLoca="
 						+ texLoca;
 
-				Log.i("ssss", urlUsers);
 				JSONArray data = new JSONArray(getJSONUrl(urlUsers, params));
 				for (int i = 0; i < data.length(); i++) {
 					JSONObject c = data.getJSONObject(i);
-					Log.i("aa", "a");
 
-					// JSONObject c = json.getJSONObject(idUsers);
 					check = new HashMap<String, String>();
 					check.put("idLoca", c.getString("idLoca"));
 					check.put("nameLoca", c.getString("nameLoca"));
@@ -525,7 +468,6 @@ public class History extends FragmentActivity{
 					check.put("score", c.getString("score"));
 					check.put("eagle", c.getString("eagle"));
 					check.put("landgon", c.getString("landgon"));
-					Log.i("dfsdfsdfsdf", c.getString("nameLoca"));
 
 					MyArrList3.add(check);
 					sumEagle = Integer.parseInt(c.getString("eagle"));
@@ -533,21 +475,17 @@ public class History extends FragmentActivity{
 					lat_desc = Double.parseDouble(c.getString("latitude"));
 					lon_desc = Double.parseDouble(c.getString("longitude"));
 					score = Integer.parseInt(c.getString("score"));
-					Log.i("score", String.valueOf(score));
 
 					kilometers(latitude, longitude, lat_desc, lon_desc);
-					Log.i("ff", tema);
-					if (5 >= total) {
+
+					if (20 >= total) {
 						Log.w("GGG", "FFF");
-						
+
 						Update();
 
+					} else {
+
 					}
-					else {
-						
-						  
-					}
-					Log.i("AAAAAAAAAAA", "AAAAA" + sumEagle);
 
 				}
 
@@ -560,10 +498,9 @@ public class History extends FragmentActivity{
 		}
 	}
 
-
+	// คำนวนระยะทางจากตำแหน่งที่เราอยู่
 	public static double kilometers(double lat1, double long1, double lat2,
 			double long2) {
-		Log.i("OOOOOOOO", "AA" + lat2 + "," + long2);
 		double degToRad = Math.PI / 180.0;
 		double phi1 = lat1 * degToRad;
 		double phi2 = lat2 * degToRad;
@@ -572,48 +509,35 @@ public class History extends FragmentActivity{
 		total = (6371.01 * Math.acos(Math.sin(phi1) * Math.sin(phi2)
 				+ Math.cos(phi1) * Math.cos(phi2) * Math.cos(lam2 - lam1)) * 1000);
 
-		Log.i("ss", "aaaaaaaaaaaaaaaaaaaaaa" + total);
-
 		return total;
 	}
-	
+
+	// อัพเดทข้อมูล
 	public void Update() {
-		Log.i("Update", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		new UpdateHistory().execute();
 		new SearchExps().execute();
-		
-		
+
 	}
-	
+
+	// อันเดทของมูลผู้ใช้
 	public class UpdateUsers extends AsyncTask<String, Void, Void> {
 
 		@Override
 		protected Void doInBackground(String... arg) {
 			// TODO Auto-generated method stub
 
-
-
-			Log.i("arrogate", String.valueOf(arrogate));
-			
 			arrogate = arrogate + 1;
 
-			
-			
 			// Paste Parameters
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("idUsers", texIdUsers));
 			params.add(new BasicNameValuePair("sumExp", String.valueOf(sumExp)));
-			params.add(new BasicNameValuePair("arrogate", String.valueOf(arrogate)));
-			params.add(new BasicNameValuePair("idStatus", String.valueOf(idStatus)));
-
-			
-
-			// JSONObject json = jsonParser.makeHttpRequest(urlUsers,"GET",
-			// params);
+			params.add(new BasicNameValuePair("arrogate", String
+					.valueOf(arrogate)));
+			params.add(new BasicNameValuePair("idStatus", String
+					.valueOf(idStatus)));
 
 			urlUsers = "http://110.164.78.161/~b531610005/updateUsers.php";
-
-			Log.i("ssss", urlUsers);
 
 			jsonParser.makeHttpRequest(urlUsers, "GET", params);
 
@@ -621,41 +545,29 @@ public class History extends FragmentActivity{
 		}
 
 	}
+
+	// อัพเดทของมูลสถานที่
 	public class UpdateHistory extends AsyncTask<String, Void, Void> {
 
 		@Override
 		protected Void doInBackground(String... arg) {
 			// TODO Auto-generated method stub
-			Log.e("tema", tema);
-			
 
 			if (tema.equals("Eagle")) {
 				sumEagle = sumEagle + authority;
 
 			} else {
 				sumLandgon = sumLandgon + authority;
-				Log.e("sumLandgon", ""+sumLandgon);
 			}
-			Log.e("sumExp", "" + sumExp);
-			Log.e("arrogate", "" + arrogate);
-			
-			
+
 			// Paste Parameters
 			List<NameValuePair> params = new ArrayList<NameValuePair>();
 			params.add(new BasicNameValuePair("idLoca", texLoca));
 			params.add(new BasicNameValuePair("eagle", String.valueOf(sumEagle)));
-			params.add(new BasicNameValuePair("landgon", String.valueOf(sumLandgon)));
-
-			Log.i("idLoca", texLoca);
-			Log.e("sumEagle", String.valueOf(sumEagle));
-			Log.i("landgon", String.valueOf(sumLandgon));
-
-			// JSONObject json = jsonParser.makeHttpRequest(urlUsers,"GET",
-			// params);
+			params.add(new BasicNameValuePair("landgon", String
+					.valueOf(sumLandgon)));
 
 			urlHistor = "http://110.164.78.161/~b531610005/updateHistory.php";
-
-			Log.i("urlHistor", urlHistor);
 
 			jsonParser.makeHttpRequest(urlHistor, "GET", params);
 
@@ -663,15 +575,13 @@ public class History extends FragmentActivity{
 		}
 
 	}
-	
+
+	// ค้นหาEXPเพื่อเพิ่มข้อมูลให้กับผู้ใช้
 	class SearchExps extends AsyncTask<String, Integer, String> {
 
 		@Override
 		protected String doInBackground(String... params) {
-			Log.i("score", String.valueOf(score));
 			sumExp = sumExp + score;
-			Log.e("sumExp", String.valueOf(sumExp));
-			
 
 			String url = "http://110.164.78.161/~b531610005/status.php";
 			return getJSONUrl(url);
@@ -718,27 +628,20 @@ public class History extends FragmentActivity{
 					map.put("nameStatus", c.getString("nameStatus"));
 					map.put("exp", c.getString("exp"));
 					map.put("authority", c.getString("authority"));
-					
+
 					id = c.getString("idStatus");
 					expnum = Integer.parseInt(c.getString("exp"));
 
 					MyArrList.add(map);
-					Log.e("sumExp", ""+sumExp);
-					Log.v("expnum", ""+expnum);
-					if(sumExp<=expnum){
-						idStatus=id;
-						Log.i("idStatus", idStatus);
+
+					if (sumExp <= expnum) {
+						idStatus = id;
 						break;
-					}
-					else if(sumExp>=350){
-						idStatus=id;
+					} else if (sumExp >= 350) {
+						idStatus = id;
 
 					}
 
-					
-					Log.v("ss", id+expnum);
-					
-					
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -747,37 +650,22 @@ public class History extends FragmentActivity{
 		}
 	}
 
-	
 	public void checkDistance(View v) {
-		/*
-		Intent checkIntent = new Intent(this, CheckDistance.class);
-		checkIntent.putExtra("idLoca", texLoca);
-		checkIntent.putExtra("idUsers", texIdUsers);
-		startActivity(checkIntent);
-		*/
-		
-		/*CheckDistance  check = new CheckDistance ();
-		check.doFirst(texLoca,texIdUsers,latitude,longitude);
-		finish();*/
-		
-		Log.i("GGGGG", "GGG1111111111111111111111111111111111111111111111111111111");
+
 		new SearchUsers().execute();
 		Intent it = new Intent(History.this, History.class);
 		it.putExtra("idUsers", texIdUsers);
 		it.putExtra("idLoca", texLoca);
 		startActivity(it);
-		
-		
-		
+
 	}
-	
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-	    if (keyCode == KeyEvent.KEYCODE_BACK) {
-	    	Intent it = new Intent(History.this, Map.class);
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			Intent it = new Intent(History.this, Map.class);
 			startActivity(it);
-	        return true;
-	    }
-	    return super.onKeyDown(keyCode, event);
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }
